@@ -1,0 +1,15 @@
+{
+  "name": "monster-siren-downloader",
+  "version": "1.0.0",
+  "description": "Download Arknights songs from Monster Siren Records (monster-siren.hypergryph.com)",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "powershell -NoProfile -ExecutionPolicy Bypass -File build.ps1"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^33.0.0"
+  }
+}
