@@ -438,8 +438,11 @@ function playSearchTrack(song, album) {
   playTrackAt(0, true);
 }
 
+let playSeq = 0;
+
 async function playTrackAt(index, autoplay = true) {
   if (index < 0 || index >= playlist.length) return;
+  const seq = ++playSeq;
   playlistIndex = index;
   const t = playlist[index];
   try {
@@ -452,8 +455,10 @@ async function playTrackAt(index, autoplay = true) {
     if (audio.src !== src) audio.src = src;
     if (autoplay) await audio.play();
   } catch (e) {
+    if (e && e.name === 'AbortError') return;
     toast(`Playback error: ${e.message}`, 'error');
   }
+  if (seq !== playSeq) return;
   loadLyrics(t.cid);
   updateMediaSession();
   highlightPlaying();
@@ -471,7 +476,7 @@ function togglePlay() {
 
 function nextTrack() {
   if (!playlist.length) return;
-  if (playback.repeat === 'one') { audio.currentTime = 0; audio.play(); return; }
+  if (playback.repeat === 'one') { audio.currentTime = 0; audio.play().catch(() => {}); return; }
   let idx;
   if (playback.shuffle && playlist.length > 1) {
     idx = (playlistIndex + 1 + Math.floor(Math.random() * (playlist.length - 1))) % playlist.length;
