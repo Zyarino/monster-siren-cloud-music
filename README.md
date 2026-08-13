@@ -5,18 +5,6 @@ A desktop app (Electron) to browse, **download**, and **play** Arknights music f
 
 ![GUI](https://img.shields.io/badge/GUI-Electron-blue?logo=electron) ![Platform](https://img.shields.io/badge/Platform-Windows-0078D6?logo=windows)
 
-## Features
-
-- **Browse albums** — official album covers and track lists from Monster Siren's API
-- **Search** — filter albums, songs, and artists instantly
-- **Download songs / albums** — saves original `.wav` files locally with album-folder structure, skips already-downloaded tracks, cancellable queue with progress bars
-- **Spotify-like player** — play/pause, next/prev, seek, shuffle & repeat, volume, queue
-- **Synced lyrics** — fetches the official LRC lyrics and highlights the current line
-- **System Media Controls (SMTC)** — control playback from your keyboard media keys and the Windows media overlay (with cover art)
-- **Your Music library** — quick access to albums you've downloaded
-- **Portable build** — package the app into a standalone `.exe` with `npm run dist`
-
-Songs that are already downloaded are played from disk; otherwise they stream from Monster Siren's CDN.
 
 ## Requirements
 
