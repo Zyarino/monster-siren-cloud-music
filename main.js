@@ -3,6 +3,7 @@ const path = require('path');
 const fs = require('fs');
 const http = require('http');
 const https = require('https');
+const { Readable } = require('stream');
 const { pathToFileURL } = require('url');
 
 const API_BASE = 'https://monster-siren.hypergryph.com/api';
@@ -30,16 +31,17 @@ function send(channel, payload) {
   }
 }
 
-function httpGet(url, onResponse) {
+function httpGet(url, extraHeaders = {}) {
   return new Promise((resolve, reject) => {
     const mod = url.startsWith('https:') ? https : http;
-    const req = mod.get(url, { headers: { 'User-Agent': UA, Referer: SITE_ORIGIN } }, (res) => {
+    const headers = { 'User-Agent': UA, Referer: SITE_ORIGIN, ...extraHeaders };
+    const req = mod.get(url, { headers }, (res) => {
       if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
         res.resume();
-        resolve(httpGet(new URL(res.headers.location, url).toString(), onResponse));
+        resolve(httpGet(new URL(res.headers.location, url).toString(), extraHeaders));
         return;
       }
-      if (res.statusCode !== 200) {
+      if (res.statusCode < 200 || res.statusCode >= 300) {
         res.resume();
         reject(new Error(`HTTP ${res.statusCode} for ${url}`));
         return;
@@ -368,16 +370,16 @@ app.whenReady().then(() => {
     try {
       const song = await getSong(cid);
       if (!song || !song.sourceUrl) return new Response('No audio source', { status: 404 });
-      const headers = { 'User-Agent': UA, Referer: SITE_ORIGIN, Accept: '*/*' };
+      const headers = { Accept: '*/*' };
       const range = request.headers.get('range');
       if (range) headers.Range = range;
-      const upstream = await net.fetch(song.sourceUrl, { headers });
+      const { res } = await httpGet(song.sourceUrl, headers);
       const hdrs = {};
       for (const k of ['content-type', 'content-length', 'content-range', 'accept-ranges', 'last-modified']) {
-        const v = upstream.headers.get(k);
+        const v = res.headers[k];
         if (v) hdrs[k] = v;
       }
-      return new Response(upstream.body, { status: upstream.status, headers: hdrs });
+      return new Response(Readable.toWeb(res), { status: res.statusCode || 200, headers: hdrs });
     } catch (e) {
       return new Response(String(e && e.message ? e.message : e), { status: 500 });
     }
